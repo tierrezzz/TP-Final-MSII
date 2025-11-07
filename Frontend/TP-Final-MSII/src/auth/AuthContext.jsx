@@ -136,6 +136,36 @@ const deleteReserva = async (reservaId) => {
   }
 };
 
+// Obtenemos el reporte.
+const getReportePDF = async () => {
+  try {
+    // 1. Llama al endpoint que ya tienes. ¡CON la barra al final!
+    const res = await authFetch('/reportes/ventas/mensual');
+
+    if (!res.ok) {
+      // Si el backend da un error 500, etc.
+      throw new Error("El servidor no pudo generar el reporte");
+    }
+
+    // 2. ¡NO USAMOS .json()! Usamos .blob()
+    // El backend nos esta enviando un archivo, no texto.
+    const pdfBlob = await res.blob();
+
+    // 3. Crea una URL temporal en el navegador para ese archivo
+    const url = URL.createObjectURL(pdfBlob);
+    
+    // 4. Abre esa URL en una pestaña nueva
+    window.open(url, '_blank');
+
+    // 5. (Opcional) Limpia la URL de la memoria del navegador
+    setTimeout(() => URL.revokeObjectURL(url), 10000); // 10 segundos
+
+  } catch (err) {
+    console.error("Error en getReportePDF:", err);
+    alert(err.message);
+  }
+};
+
   // Login: obtiene el token y guarda usuario
   const login = async (username, password) => {
     const formData = new FormData();
@@ -202,7 +232,7 @@ const deleteReserva = async (reservaId) => {
 
   // Expone el 'valor' del contexto al resto de la app
   return (
-    <AuthContext.Provider value={{ user, createReserva, deleteReserva, register, login, logout, authFetch }}>
+    <AuthContext.Provider value={{ user, createReserva, deleteReserva, register, login, logout, authFetch, getReportePDF }}>
       {!loading && children}
     </AuthContext.Provider>
   );

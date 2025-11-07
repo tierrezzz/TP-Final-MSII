@@ -23,16 +23,28 @@ const userInfo = {
   gap: '15px'
 };
 
-
 function Navbar() {
   // 1. Trae el 'user' y 'logout' del cerebro
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, getReportePDF} = useContext(AuthContext);
+
+const handleReportClick = (e) => {
+  e.preventDefault(); // Evita que el link intente navegar
+  getReportePDF();    // Llama a la funcion del authprovider
+};
+
 
   return (
     <nav style={navStyle}>
       <div style={navLinks}>
         <Link to="/dashboard">Habitaciones</Link>
         <Link to="/mis-reservas">Mis Reservas</Link>
+        <a 
+          href="#" 
+          onClick={handleReportClick}
+        >
+          Reportes
+        </a>
+
       </div>
 
       <div style={userInfo}>
