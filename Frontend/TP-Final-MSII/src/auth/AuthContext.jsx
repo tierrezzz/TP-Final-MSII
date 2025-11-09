@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
           }
 
           const data = await res.json();
-          setUser(data); // ¡Logueado!
+          setUser(data); // Logueado
 
         } catch {
           localStorage.removeItem("token");
@@ -58,7 +58,7 @@ useEffect(() => {
   });
 
   if (!res.ok) {
-    // Si fallo el registro (ej: 400 "Usuario ya en uso")
+    // Si fallo el registro (400 "Usuario ya en uso")
     const errorData = await res.json();
     return { error: errorData.detail };
   }

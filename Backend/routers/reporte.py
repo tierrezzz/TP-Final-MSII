@@ -25,7 +25,7 @@ def generar_pdf(datos: List, titulo: str):
     
     # los encabezados de la tabla
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(50, 10, "Anio", 1) # Sin acento
+    pdf.cell(50, 10, "Año", 1) # Sin acento
     pdf.cell(50, 10, "Mes", 1)
     pdf.cell(50, 10, "Total Ventas", 1)
     pdf.ln()
