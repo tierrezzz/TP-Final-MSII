@@ -58,7 +58,7 @@ useEffect(() => {
   });
 
   if (!res.ok) {
-    // Si fallo el registro (400 "Usuario ya en uso")
+    // Si fallo el registro
     const errorData = await res.json();
     return { error: errorData.detail };
   }
@@ -76,25 +76,23 @@ const createReserva = async (reservaData) => {
   // { habitacion_id: 5, fecha_inicio: "2025-11-10", fecha_fin: "2025-11-12" }
 
   try {
-    // Usamos authFetch que ya envia el token y el Content-Type
+    // Usamos authFetch que ya envia el token 
     const res = await authFetch('/reservas/', {
       method: 'POST',
       body: JSON.stringify(reservaData),
     });
 
+    // Si el backend da un error
     if (!res.ok) {
-      // Si el backend da un error (422, 401, 500...)
+      
       const errorData = await res.json();
       let errorMessage = "Ocurrió un error desconocido.";
 
       if (errorData.detail) {
-        // Si 'detail' es una LISTA (un error 422 de validacion)
         if (Array.isArray(errorData.detail)) {
-          // Tomamos el primer mensaje de error y su locacion
           const firstError = errorData.detail[0];
           errorMessage = `${firstError.msg} (campo: ${firstError.loc[1]})`;
         } else {
-          // Si 'detail' es un STRING (un error 401, 400, etc)
           errorMessage = errorData.detail;
         }
       }
@@ -102,7 +100,7 @@ const createReserva = async (reservaData) => {
       return { error: errorMessage };
     }
 
-    // ¡Exito! Devuelve la reserva que acabamos de crear
+    // Devuelve la reserva que acabamos de crear
     const nuevaReserva = await res.json();
     return nuevaReserva;
 
@@ -115,20 +113,19 @@ const createReserva = async (reservaData) => {
 const deleteReserva = async (reservaId) => {
   try {
     // Usamos authFetch que ya envia el token
-    // Nota que el 'method' es 'DELETE' y no hay 'body'
     const res = await authFetch(`/reservas/${reservaId}`, {
       method: 'DELETE',
     });
 
     if (!res.ok) {
-      // Si el backend da un error (ej: 403 No tienes permiso)
+      // Si el backend da un error
       const errorData = await res.json();
       return { error: errorData.detail || "Error al cancelar la reserva" };
     }
 
-    // ¡Exito! El backend devuelve un mensaje de éxito.
+    // El backend devuelve un mensaje de exito.
     const successData = await res.json();
-    return successData; // Ej: { "mensaje": "Reserva cancelada exitosamente" }
+    return successData;
 
   } catch (err) {
     console.error("Error en deleteReserva:", err);
@@ -139,25 +136,25 @@ const deleteReserva = async (reservaId) => {
 // Obtenemos el reporte.
 const getReportePDF = async () => {
   try {
-    // 1. Llama al endpoint que ya tienes. ¡CON la barra al final!
+    // Llama al endpoint
     const res = await authFetch('/reportes/ventas/mensual');
-
+  
+    // Si el backend da un error
     if (!res.ok) {
-      // Si el backend da un error 500, etc.
+      
       throw new Error("El servidor no pudo generar el reporte");
     }
 
-    // 2. ¡NO USAMOS .json()! Usamos .blob()
-    // El backend nos esta enviando un archivo, no texto.
+    // No usamos .json() Usamos .blob()
     const pdfBlob = await res.blob();
 
-    // 3. Crea una URL temporal en el navegador para ese archivo
+    // Crea una URL temporal en el navegador para ese archivo ".blob()""
     const url = URL.createObjectURL(pdfBlob);
     
-    // 4. Abre esa URL en una pestaña nueva
+    // Abre esa URL en una pestaña nueva
     window.open(url, '_blank');
 
-    // 5. (Opcional) Limpia la URL de la memoria del navegador
+    // Limpia la URL de la memoria del navegador
     setTimeout(() => URL.revokeObjectURL(url), 10000); // 10 segundos
 
   } catch (err) {
@@ -176,9 +173,10 @@ const getReportePDF = async () => {
       method: "POST",
       body: formData, 
     });
-
+    
+    // Si fallo el login 
     if (!res.ok) {
-      // Si fallo el login (ej: 401 Unauthorized)
+     
       const errorData = await res.json();
       return { error: errorData.detail };
     }
@@ -208,7 +206,7 @@ const getReportePDF = async () => {
     setUser(null);
   };
 
-// Petición autenticada con fetch
+// Peticion autenticada con fetch
   const authFetch = async (url, options = {}) => {
     const token = localStorage.getItem("token");
     const headers = {

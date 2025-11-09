@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { AuthContext } from '../auth/AuthContext';
-import { Link } from 'react-router-dom'; // Para los links de navegacion
+import { Link } from 'react-router-dom'; 
 
-// Un estilo basico para el Navbar (CSS puro y simple)
+// --- Estilos el Navbar ---
 const navStyle = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -14,25 +14,27 @@ const navStyle = {
 
 const navLinks = {
   display: 'flex',
-  gap: '20px'
+  gap: '20px' // Espacio entre links
 };
 
 const userInfo = {
   display: 'flex',
   alignItems: 'center',
-  gap: '15px'
+  gap: '15px' // Espacio entre "Hola" y el boton
 };
 
+// --- Componente de la Barra de Navegacion ---
 function Navbar() {
-  // 1. Trae el 'user' y 'logout' del cerebro
+
   const { user, logout, getReportePDF} = useContext(AuthContext);
 
-const handleReportClick = (e) => {
-  e.preventDefault(); // Evita que el link intente navegar
-  getReportePDF();    // Llama a la funcion del authprovider
-};
+  // --- Manejador para el boton de Reportes ---
+  const handleReportClick = (e) => {
+    e.preventDefault(); 
+    getReportePDF();
+  };
 
-
+  // Renderiza el Navbar
   return (
     <nav style={navStyle}>
       <div style={navLinks}>
@@ -41,6 +43,8 @@ const handleReportClick = (e) => {
         <a 
           href="#" 
           onClick={handleReportClick}
+          role="button" 
+          style={{ padding: 0, margin: 0, background: 'none', border: 'none', color: 'var(--pico-primary)' }}
         >
           Reportes
         </a>

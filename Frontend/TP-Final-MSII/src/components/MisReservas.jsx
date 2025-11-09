@@ -1,133 +1,137 @@
-// src/components/MisReservas.jsx
-
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 import Navbar from "./Navbar";
 
+// --- Componente de la pagina "Mis Reservas" ---
+// Muestra las reservas del usuario y permite cancelarlas
 function MisReservas() {
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { authFetch, deleteReserva} = useContext(AuthContext); // Traemos el fetcher
+  
+  const { authFetch, deleteReserva } = useContext(AuthContext); 
 
+  // --- Carga las reservas del usuario al iniciar ---
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        // Este endpoint (GET /reservas) ya esta protegido y
-        // solo devuelve las reservas del usuario (gracias al token)
-        const res = await authFetch("/reservas");
-
+        // Llama al backend con el token para traer SOLO las reservas de este usuario
+        const res = await authFetch("/reservas/");
+        
+        // Si el backend falla 
         if (!res.ok) {
           throw new Error(
             "Error al cargar tus reservas o no tiene reservas realizadas"
           );
         }
-
+        
+        // Guarda las reservas en el estado
         const data = await res.json();
-        setReservas(data);
+        setReservas(data); 
+
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false); // Pase lo que pase, dejamos de cargar
+        setLoading(false); 
       }
     };
 
     fetchReservas();
-  }, [authFetch]); // La dependencia es authFetch
+  }, [authFetch]);
 
-
-  // Funcion para cancelar una reserva
+  // --- Manejador para CANCELAR una reserva ---
   const handleCancel = async (reservaId) => {
+
+    // Pide confirmacion al usuario
     if (!window.confirm("¿Estas seguro de que quieres cancelar esta reserva?")) {
-      return; // Si dice "No", no hacemos nada
+      return;
     }
 
     const result = await deleteReserva(reservaId);
-
+    
+    
+    // Si el backend da un error, lo muestra
     if (result.error) {
       alert(`Error al cancelar: ${result.error}`);
     } else {
-      alert(result.mensaje); // Muestra "Reserva cancelada exitosamente"
+      alert(result.mensaje); 
       
-      // Actualizamos la lista de reservas en pantalla SIN recargar.
-      // Creamos una nueva lista filtrando la reserva que acabamos de borrar.
+      // --- Actualizacion instantanea ---
+      // Filtra la lista de reservas en el estado para quitar la que
+      // acabamos de borrar. Esto actualiza la UI sin recargar la pagina.
       setReservas(prevReservas => 
         prevReservas.filter(reserva => reserva.id !== reservaId)
       );
     }
   };
 
-  // --- Renderizado ---
-
+  // --- Renderizado: Muestra "Cargando..." ---
   if (loading) {
     return (
       <>
         <Navbar />
-        <div style={{ padding: "20px" }}>
+        <main className="container">
           <p>Cargando tus reservas...</p>
-        </div>
+        </main>
       </>
     );
   }
 
+  // --- Renderizado: Muestra un error ---
   if (error) {
     return (
       <>
         <Navbar />
-        <div style={{ padding: "20px" }}>
+        <main className="container">
           <p style={{ color: "red" }}>{error}</p>
-        </div>
+        </main>
       </>
     );
   }
 
+  // --- Renderizado principal ---
   return (
     <div>
       <Navbar />
       <main className="container">
         <h1 style={{ marginTop: "20px" }}>Mis Reservas</h1>
 
-        {loading && <p>Cargando tus reservas...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {/* Revisa si hay reservas, si no, muestra un mensaje */}
+        {reservas.length === 0 ? (
+          <p>Todavía no has hecho ninguna reserva.</p>
+        ) : (
+          // Si hay reservas, las mapea en una grilla
+          <div className="grid">
+            {reservas.map((reserva) => (
+              // Cada reserva es una "card" (<article>)
+              <article key={reserva.id}>
+                {/* Muestra el nombre del tipo (del JOIN del backend) */}
+                <h4>{reserva.tipo_nombre}</h4>
 
-        {!loading && !error && (
-          <>
-            {reservas.length === 0 ? (
-              <p>Todavía no has hecho ninguna reserva.</p>
-            ) : (
-              // Usamos la misma grilla que en el Dashboard
-              <div className="grid">
-                {reservas.map((reserva) => (
-                  // Cada reserva es una "card"
-                  <article key={reserva.id}>
-                    {/* ¡Usamos los nuevos datos del JOIN! */}
-                    <h4>{reserva.tipo_nombre}</h4>
+                <p>
+                  <strong>Desde:</strong> {reserva.fecha_inicio}
+                  <br />
+                  <strong>Hasta:</strong> {reserva.fecha_fin}
+                  <br />
+                  <strong>Precio:</strong> ${reserva.precio} / noche
+                </p>
 
-                    <p>
-                      <strong>Desde:</strong> {reserva.fecha_inicio}
-                      <br />
-                      <strong>Hasta:</strong> {reserva.fecha_fin}
-                      <br />
-                      <strong>Precio:</strong> ${reserva.precio} / noche
-                    </p>
-
-                    <footer>
-                      <button
-                        className="secondary outline"
-                        style={{
-                          color: "var(--pico-color-red-500)",
-                          borderColor: "var(--pico-color-red-500)",
-                        }}
-                        onClick={() => handleCancel(reserva.id)}
-                      >
-                        Cancelar
-                      </button>
-                    </footer>
-                  </article>
-                ))}
-              </div>
-            )}
-          </>
+                <footer>
+                  <button
+                    className="secondary outline"
+                    style={{
+                      color: "var(--pico-color-red-500)",
+                      borderColor: "var(--pico-color-red-500)",
+                    }}
+                    // Conecta el boton al manejador
+                    onClick={() => handleCancel(reserva.id)} 
+                  >
+                    Cancelar
+                  </button>
+                </footer>
+              </article>
+            ))}
+          </div>
         )}
       </main>
     </div>
