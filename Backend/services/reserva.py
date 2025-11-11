@@ -5,7 +5,6 @@ from fastapi import HTTPException, status
 from datetime import date
 
 # --- Funcion para OBTENER las reservas de un usuario ---
-# Recibe el ID del usuario
 async def get_reservas_by_usuario(usuario_id: int) -> List[Reserva]:
     query = """
         SELECT 
@@ -54,8 +53,7 @@ async def create_reserva(reserva: ReservaCreate, usuario_id: int) -> Reserva:
         INSERT INTO reservas (usuario_id, habitacion_id, fecha_inicio, fecha_fin)
         VALUES (:usuario_id, :habitacion_id, :fecha_inicio, :fecha_fin)
     """
-    
-    # Combina los datos de la reserva con el usuario_id
+
     values = {**reserva.model_dump(), "usuario_id": usuario_id}
     
     # Ejecuta la insercion y obtiene el ID nuevo
@@ -69,20 +67,18 @@ async def create_reserva(reserva: ReservaCreate, usuario_id: int) -> Reserva:
     return Reserva(**dict(created_reserva))
 
 # --- Funcion para MODIFICAR una reserva ---
+# Sin uso, para futura funciones
 async def update_reserva(reserva_id: int, usuario_id: int, reserva_data: ReservaCreate) -> Reserva:
-    # 1. Obtenemos la reserva para verificar al dueño
+  
     query_check = "SELECT * FROM reservas WHERE id = :reserva_id"
     reserva_db = await db.fetch_one(query_check, values={"reserva_id": reserva_id})
 
-    # 2. Verificamos si existe
     if not reserva_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva no encontrada")
 
-    # 3. Verificamos que sea del usuario
     if reserva_db["usuario_id"] != usuario_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permiso para modificar esta reserva")
 
-    # 4. Si todo OK, actualizamos
     query_update = """
         UPDATE reservas
         SET habitacion_id = :habitacion_id, 
@@ -90,12 +86,10 @@ async def update_reserva(reserva_id: int, usuario_id: int, reserva_data: Reserva
             fecha_fin = :fecha_fin
         WHERE id = :reserva_id
     """
-    # Combina los datos de la reserva con el ID para la consulta
     values = {**reserva_data.model_dump(), "reserva_id": reserva_id}
     await db.execute(query_update, values)
 
-    # 5. Devolvemos la reserva actualizada (ya convertida a dict para el schema)
-    # Reusamos la data de `values` y le agregamos los IDs
+
     updated_data = {
         **reserva_data.model_dump(),
         "id": reserva_id,
@@ -105,17 +99,14 @@ async def update_reserva(reserva_id: int, usuario_id: int, reserva_data: Reserva
 
 # Funcion para ELIMINAR una reserva (Cancelar)
 async def delete_reserva(reserva_id: int, usuario_id: int):
-    # 1. Obtenemos la reserva para verificarla
-    reserva = await get_reserva_by_id(reserva_id) # Reusa la funcion de arriba
     
-    # 2. El chequeo de seguridad MAS importante
+    reserva = await get_reserva_by_id(reserva_id) 
+    
     # Compara el dueño de la reserva con el que la quiere borrar (del token)
     if reserva["usuario_id"] != usuario_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permiso para borrar esta reserva")
 
-    # 3. Si todo ok, la borra
     query = "DELETE FROM reservas WHERE id = :id"
     await db.execute(query, values={"id": reserva_id})
-    
-    # Devuelve un mensaje de exito
+   
     return {"mensaje": "Reserva cancelada exitosamente"}

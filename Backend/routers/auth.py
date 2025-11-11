@@ -11,20 +11,18 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 # --- Endpoint de Login ---
 @router.post("/login", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    # Intenta autenticar al usuario
+    
     usuario = await authenticate_user(form_data.username, form_data.password)
     
-    # Si el servicio devuelve None (fallo), lanza error 401
+    # Si el servicio devuelve None (fallo)
     if not usuario:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario o contraseña incorrectos")
-    
-    # tiempo de expiracion del token
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     # Crea el token JWT
     token = create_access_token(data={"sub": usuario.username}, expires_delta=access_token_expires)
-    
-    # Devuelve el token
+
     return Token(access_token=token, token_type="bearer")
 
 '''
@@ -40,10 +38,7 @@ async def read_users_me(current_user: Annotated[Usuario, Depends(get_current_use
     return current_user
 
 # --- Endpoint de Registro ---
-# Ruta POST /auth/register
 @router.post("/register", response_model=Usuario)
 async def register(usuario: UsuarioCreate):
-    # Recibe los datos de registro (schema UsuarioCreate)
-    # Llama al servicio "create_user" para crear el usuario en la DB
-    # Devuelve el usuario recien creado
+
     return await create_user(usuario)

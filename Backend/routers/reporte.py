@@ -25,7 +25,7 @@ def generar_pdf(datos: List, titulo: str):
     
     # los encabezados de la tabla
     pdf.set_font("Arial", "B", 12)
-    pdf.cell(50, 10, "Año", 1) # Sin acento
+    pdf.cell(50, 10, "Año", 1) 
     pdf.cell(50, 10, "Mes", 1)
     pdf.cell(50, 10, "Total Ventas", 1)
     pdf.ln()
@@ -51,16 +51,15 @@ async def reporte_ventas_mensuales(user: Usuario = Depends(get_current_user)):
     """
     # Esta ruta esta protegida. Primero valida el token.
     
-    # 1. Obtiene los datos de la base de datos
+    # Obtiene los datos de la base de datos
     datos = await get_ventas_mensuales()
     
-    # 2. Llama a la funcion auxiliar para crear el PDF en memoria
+    # Llama a la funcion auxiliar para crear el PDF en memoria
     pdf_bytes = generar_pdf(datos, "Reporte de Ventas Mensuales")
     
-    # 3. Devuelve una respuesta HTTP especial (no un JSON)
+    # Devuelve una respuesta HTTP especial (no un JSON)
     return Response(
         content=pdf_bytes, # El contenido es el PDF en bytes
-        media_type="application/pdf", # Avisa al navegador que es un PDF
-        # Fuerza al navegador a descargar el archivo con un nombre
+        media_type="application/pdf",
         headers={"Content-Disposition": "attachment; filename=reporte_ventas_mensuales.pdf"}
     )

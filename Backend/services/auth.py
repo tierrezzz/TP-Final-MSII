@@ -52,9 +52,9 @@ async def authenticate_user(username: str, password: str):
 
 # --- Funcion de DEPENDENCIA para proteger rutas ---
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Usuario:
-    # Intenta decodificar el token (Bearer)
+ 
     payload = decode_token(token)
-    # Saca el username (el "sub") del token
+ 
     username = payload.get("sub")
     if username is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no autenticado")
@@ -77,7 +77,6 @@ async def create_user(usuario: UsuarioCreate):
             detail="El nombre de usuario ya esta en uso"
         )
 
-    # Hashea el password nuevo
     hashed_password_value = get_password_hash(usuario.password)
     
     # Consulta que agrega al nuevo usuario

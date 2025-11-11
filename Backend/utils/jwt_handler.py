@@ -9,19 +9,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Configuracion de JWT ---
-# Lee los secretos y configuracion para los tokens
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES"))
 
 # --- Funcion para CREAR un token ---
-# Genera un nuevo JSON Web Token (JWT)
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
-    # Copia los datos que van dentro del token (ej: username)
+    # Copia los datos que van dentro del token
     to_encode = data.copy()
     
-    # Si se pasa un tiempo, se usa. Si no, se usa el default.
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
@@ -35,7 +32,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 # --- Funcion para DECODIFICAR un token ---
-# Lee un token, lo valida y devuelve los datos
 def decode_token(token: str):
 
     try:

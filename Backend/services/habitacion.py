@@ -26,7 +26,7 @@ async def get_habitacion_by_id(habitacion_id: int):
     habitacion = await db.fetch_one(query, values={"id": habitacion_id})
     if not habitacion:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Habitacion no encontrada")
-    return habitacion # Devuelve el 'Record' de la DB
+    return habitacion 
 
 # --- Funcion para CREAR una habitacion ---
 # No esta en uso pero sirve para futuras funcionalidades
@@ -38,7 +38,6 @@ async def create_habitacion(habitacion: HabitacionIn):
     # Convierte el objeto Pydantic (habitacion) a un diccionario
     values = habitacion.dict()
     
-    # Ejecuta la consulta y obtiene el ID nuevo
     last_id = await db.execute(query, values)
     
     # Devuelve el objeto creado + el nuevo ID
@@ -49,7 +48,7 @@ async def create_habitacion(habitacion: HabitacionIn):
 # --- Funcion para MODIFICAR una habitacion ---
 async def update_habitacion(habitacion_id: int, habitacion_data: HabitacionIn):
     # Verifica si existe primero
-    await get_habitacion_by_id(habitacion_id) # Si no existe, esto da 404
+    await get_habitacion_by_id(habitacion_id) 
 
     query = """
         UPDATE habitaciones
@@ -66,8 +65,7 @@ async def update_habitacion(habitacion_id: int, habitacion_data: HabitacionIn):
 
 # --- Funcion para ELIMINAR una habitacion ---
 async def delete_habitacion(habitacion_id: int):
-    # Verifica si existe primero
-    await get_habitacion_by_id(habitacion_id) # Si no existe, esto da 404
+    await get_habitacion_by_id(habitacion_id) 
 
     query = "DELETE FROM habitaciones WHERE id = :id"
     await db.execute(query, values={"id": habitacion_id})
